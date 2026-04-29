@@ -50,7 +50,7 @@ const COMMENT_RULE: RuntimeRule = { type: 'comment', startShift: 0, lengthAdjust
 const TAG_NAME_CHAR = /[A-Za-z0-9_:]/;
 
 const CONTROL_KEYWORDS = new Set([
-	'if', 'elseif', 'else', 'unless',
+	'if', 'elseif', 'else', 'unless', 'elseunless',
 	'endif', 'endunless',
 	'foreach', 'for', 'each',
 	'endforeach', 'endfor', 'endeach'

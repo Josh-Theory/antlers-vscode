@@ -27,10 +27,21 @@ test('{{ if x }}…{{ /if }} → keyword, variable, keyword (closing /if)', asyn
 	]);
 });
 
-test('{{ unless x }} → keyword "unless" highlighted (variable positions known-broken upstream)', async () => {
-	const tokens = await tokenize('{{ unless x }}');
-	const keyword = tokens.find(t => t.type === 'keyword');
-	assert.deepEqual(keyword, { line: 0, char: 3, length: 6, type: 'keyword' });
+test('{{ unless x }} → keyword + variable at correct positions', async () => {
+	assert.deepEqual(await tokenize('{{ unless x }}'), [
+		{ line: 0, char: 3, length: 6, type: 'keyword' },
+		{ line: 0, char: 10, length: 1, type: 'variable' }
+	]);
+});
+
+test('{{ unless }}…{{ elseunless y }}…{{ /unless }} → keywords + variables at correct positions', async () => {
+	assert.deepEqual(await tokenize('{{ unless x }}hi{{ elseunless y }}hi{{ /unless }}'), [
+		{ line: 0, char: 3, length: 6, type: 'keyword' },    // unless
+		{ line: 0, char: 10, length: 1, type: 'variable' },  // x
+		{ line: 0, char: 19, length: 10, type: 'keyword' },  // elseunless
+		{ line: 0, char: 30, length: 1, type: 'variable' },  // y
+		{ line: 0, char: 39, length: 7, type: 'keyword' }    // /unless
+	]);
 });
 
 test('multi-line: tags on different lines preserve line/char positions', async () => {
