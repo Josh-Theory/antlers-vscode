@@ -113,3 +113,21 @@ test('{{ foo | upper }} → variable, pipe operator, modifier function', async (
 		{ line: 0, char: 9, length: 5, type: 'function' }
 	]);
 });
+
+test('{{ collection:articles }} → single variable token spanning full namespaced name', async () => {
+	assert.deepEqual(await tokenize('{{ collection:articles }}'), [
+		{ line: 0, char: 3, length: 19, type: 'variable' }
+	]);
+});
+
+test('{{ partial:foo }} → single variable token spanning full namespaced name', async () => {
+	assert.deepEqual(await tokenize('{{ partial:foo }}'), [
+		{ line: 0, char: 3, length: 11, type: 'variable' }
+	]);
+});
+
+test('{{ /collection }} → variable token covering /name (closing non-keyword tag)', async () => {
+	assert.deepEqual(await tokenize('{{ /collection }}'), [
+		{ line: 0, char: 3, length: 11, type: 'variable' }
+	]);
+});

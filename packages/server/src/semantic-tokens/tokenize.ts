@@ -56,7 +56,7 @@ const CONTROL_KEYWORDS = new Set([
 	'endforeach', 'endfor', 'endeach'
 ]);
 
-interface KeywordHit {
+interface HeadNameHit {
 	token: Token;
 	sourceStart: number;
 	sourceEnd: number;
@@ -69,18 +69,18 @@ function collectFromNode(text: string, node: NodeLike, tokens: Token[]): void {
 		if (tok) tokens.push(tok);
 		return;
 	}
-	const kw = node.isTagNode ? findKeyword(text, node) : null;
-	if (kw) tokens.push(kw.token);
+	const head = node.isTagNode ? findHeadName(text, node) : null;
+	if (head) tokens.push(head.token);
 	for (const inner of node.runtimeNodes ?? []) {
 		const rule = RUNTIME_RULES[inner.constructor.name];
 		if (!rule) continue;
-		if (kw && overlapsKeyword(inner, kw)) continue;
+		if (head && overlapsHeadName(inner, head)) continue;
 		const tok = makeToken(inner, rule);
 		if (tok) tokens.push(tok);
 	}
 }
 
-function findKeyword(text: string, node: NodeLike): KeywordHit | null {
+function findHeadName(text: string, node: NodeLike): HeadNameHit | null {
 	const start = node.startPosition;
 	if (!start) return null;
 	let i = start.offset + 2; // skip "{{"
@@ -92,24 +92,24 @@ function findKeyword(text: string, node: NodeLike): KeywordHit | null {
 	const nameEnd = i;
 	if (nameEnd === nameStart) return null;
 	const bareName = text.slice(nameStart, nameEnd);
-	if (!CONTROL_KEYWORDS.has(bareName)) return null;
+	const type: TokenType = CONTROL_KEYWORDS.has(bareName) ? 'keyword' : 'variable';
 	return {
 		token: {
 			line: start.line - 1,
 			char: start.char - 1 + (slashStart - start.offset),
 			length: nameEnd - slashStart,
-			type: 'keyword'
+			type
 		},
 		sourceStart: slashStart,
 		sourceEnd: nameEnd
 	};
 }
 
-function overlapsKeyword(node: NodeLike, kw: KeywordHit): boolean {
+function overlapsHeadName(node: NodeLike, head: HeadNameHit): boolean {
 	const s = node.startPosition?.offset;
 	const e = node.endPosition?.offset;
 	if (s === undefined || e === undefined) return false;
-	return s < kw.sourceEnd && e > kw.sourceStart;
+	return s < head.sourceEnd && e > head.sourceStart;
 }
 
 function makeToken(node: NodeLike, rule: RuntimeRule): Token | null {
