@@ -16,6 +16,10 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 
 import type { Diagnostic as LinterDiagnostic, LinterConfig, Severity } from 'td-antlers-linter' with { 'resolution-mode': 'import' };
 
+import { tokenize } from './semantic-tokens/tokenize.js';
+import { encode } from './semantic-tokens/encode.js';
+import { tokenTypes, tokenModifiers } from './semantic-tokens/legend.js';
+
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
 
@@ -34,6 +38,13 @@ connection.onInitialize((params: InitializeParams) => {
 			diagnosticProvider: {
 				interFileDependencies: false,
 				workspaceDiagnostics: false
+			},
+			semanticTokensProvider: {
+				legend: {
+					tokenTypes: [...tokenTypes],
+					tokenModifiers: [...tokenModifiers]
+				},
+				full: true
 			}
 		}
 	};
@@ -187,6 +198,13 @@ function toLspDiagnostic(diag: LinterDiagnostic, textDocument: TextDocument): Di
 		code: diag.ruleId
 	};
 }
+
+connection.languages.semanticTokens.on(async params => {
+	const document = documents.get(params.textDocument.uri);
+	if (!document) return { data: [] };
+	const tokens = await tokenize(document.getText());
+	return { data: encode(tokens) };
+});
 
 documents.listen(connection);
 connection.listen();
