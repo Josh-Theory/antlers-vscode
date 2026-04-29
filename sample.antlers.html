@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>{{ page_title | upper }}</title>
+</head>
+<body>
+	{{# A comment that should be greyed out #}}
+
+	{{ if user }}
+		<p>Hello, {{ user | upper }}!</p>
+		{{ if user == "admin" }}
+			<a href="/admin">Admin panel</a>
+		{{ /if }}
+	{{ else }}
+		<p>Please sign in</p>
+	{{ /if }}
+
+	{{ foreach posts }}
+		<article>
+			<h2>{{ title }}</h2>
+			<time>{{ published_at | format "Y-m-d" }}</time>
+			<p>{{ excerpt }}</p>
+		</article>
+	{{ /foreach }}
+
+	<footer>&copy; {{ year }} — {{ count + 1 }} visitors</footer>
+</body>
+</html>

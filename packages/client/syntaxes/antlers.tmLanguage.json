@@ -1,0 +1,77 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Antlers",
+	"scopeName": "text.html.antlers",
+	"patterns": [
+		{ "include": "#antlers-comment" },
+		{ "include": "#antlers-interpolation" },
+		{ "include": "text.html.basic" }
+	],
+	"repository": {
+		"antlers-comment": {
+			"name": "comment.block.antlers",
+			"begin": "\\{\\{#",
+			"end": "#\\}\\}",
+			"beginCaptures": {
+				"0": { "name": "punctuation.definition.comment.begin.antlers" }
+			},
+			"endCaptures": {
+				"0": { "name": "punctuation.definition.comment.end.antlers" }
+			}
+		},
+		"antlers-interpolation": {
+			"name": "meta.embedded.block.antlers",
+			"begin": "\\{\\{",
+			"end": "\\}\\}",
+			"beginCaptures": {
+				"0": { "name": "punctuation.section.embedded.begin.antlers" }
+			},
+			"endCaptures": {
+				"0": { "name": "punctuation.section.embedded.end.antlers" }
+			},
+			"patterns": [
+				{ "include": "#antlers-keyword" },
+				{ "include": "#antlers-string" },
+				{ "include": "#antlers-number" },
+				{ "include": "#antlers-operator" },
+				{ "include": "#antlers-variable" }
+			]
+		},
+		"antlers-keyword": {
+			"name": "keyword.control.antlers",
+			"match": "\\/?(?:if|elseif|else|unless|foreach|for|each|endif|endunless|endforeach|endfor|endeach)\\b"
+		},
+		"antlers-string": {
+			"patterns": [
+				{
+					"name": "string.quoted.double.antlers",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{ "name": "constant.character.escape.antlers", "match": "\\\\." }
+					]
+				},
+				{
+					"name": "string.quoted.single.antlers",
+					"begin": "'",
+					"end": "'",
+					"patterns": [
+						{ "name": "constant.character.escape.antlers", "match": "\\\\." }
+					]
+				}
+			]
+		},
+		"antlers-number": {
+			"name": "constant.numeric.antlers",
+			"match": "\\b\\d+(\\.\\d+)?\\b"
+		},
+		"antlers-operator": {
+			"name": "keyword.operator.antlers",
+			"match": "==|!=|>=|<=|&&|\\|\\||\\?\\?|[+\\-*/<>=!|]"
+		},
+		"antlers-variable": {
+			"name": "variable.other.antlers",
+			"match": "\\b[a-zA-Z_][\\w]*(?::[a-zA-Z_][\\w]*)*\\b"
+		}
+	}
+}

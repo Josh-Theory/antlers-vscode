@@ -33,6 +33,16 @@
 				]
 			}
 		],
+		"grammars": [
+			{
+				"language": "antlers",
+				"scopeName": "text.html.antlers",
+				"path": "./syntaxes/antlers.tmLanguage.json",
+				"embeddedLanguages": {
+					"meta.embedded.block.antlers": "antlers"
+				}
+			}
+		],
 		"configuration": {
 			"type": "object",
 			"title": "Antlers",
