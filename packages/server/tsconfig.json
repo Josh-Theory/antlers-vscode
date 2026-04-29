@@ -4,10 +4,13 @@
 		"lib": [
 			"ES2024"
 		],
-		"module": "commonjs",
-		"moduleResolution": "node",
+		"module": "node16",
+		"moduleResolution": "node16",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
+		"composite": true,
 		"outDir": "out",
 		"rootDir": "src"
 	},

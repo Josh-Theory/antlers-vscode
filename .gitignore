@@ -1,0 +1,6 @@
+.claude
+node_modules/
+packages/*/out/
+packages/*/.vscode-test/
+*.tsbuildinfo
+.DS_Store
