@@ -1,184 +1,132 @@
-# Antlers Language Support - Packaging & Distribution Guide
+# Antlers Language Support — Packaging & Distribution Guide
 
-## Overview
+This repository ships Antlers tooling along two independent distribution paths:
 
-This repository ships Antlers tooling to several editors:
+| Path | Artifact | Source | Distribution channel |
+| --- | --- | --- | --- |
+| **VS Code** | `td-antlers-vscode` extension | `packages/client/` (bundles `packages/server/`) | Visual Studio Marketplace / VSIX |
+| **Neovim** | `td-antlers-language-server` (npm) + `tree-sitter-antlers` grammar + `antlers.nvim` plugin | `packages/server/`, `tree-sitter-antlers/`, `nvim/` | npm + Git |
 
-| Artifact | Path | Distributed via |
-| --- | --- | --- |
-| VS Code extension | `packages/client/` | Visual Studio Marketplace / VSIX |
-| Language server | `packages/server/` | npm (`td-antlers-language-server`) |
-| Tree-sitter grammar | `tree-sitter-antlers/` | Source / `nvim-treesitter` |
-| Neovim plugin | `nvim/` | Git (lazy.nvim, packer, manual) |
+Both paths are driven by the same language server (`packages/server/`). VS Code bundles it inline; Neovim installs it from npm and uses a tree-sitter grammar for highlighting.
 
-The VS Code extension still bundles the language server inline. Other editors consume the
-language server as a standalone binary via npm, and use the tree-sitter grammar for
-highlighting.
-
-This repository's root `package.json` is `"private": true` — never run `npm publish` from the
-workspace root. Publishing happens from individual package directories (see below).
+The workspace root `package.json` is `"private": true` — never run `npm publish` from the workspace root. Publishing happens from individual package directories.
 
 ---
 
-## Prerequisites (for the person packaging)
+## Prerequisites
 
-- **Node.js** ≥ 18
-- **VS Code** ≥ 1.100.0
-- `npm install` run from the workspace root at least once
+For anyone publishing from this repo:
 
----
+- Node.js ≥ 18
+- A clone of the repo with `npm install` run from the workspace root
 
-## Release workflow
-
-Use this checklist for every version you plan to share.
-
-1. Decide the release channel:
-   - **Private/team distribution:** create a `.vsix` and share it directly.
-   - **Public or organization-wide distribution:** publish the extension package with `vsce`
-     to the Visual Studio Marketplace.
-2. Update `"version"` in `packages/client/package.json`. This is the extension version used
-   by VS Code, Marketplace, and the generated VSIX filename.
-3. Run the release package command from the workspace root:
-
-```bash
-npm run package
-```
-
-4. Install the generated VSIX locally and smoke-test it with an `.antlers.html` file before
-   sharing or publishing.
-5. If publishing to Marketplace, run the Marketplace publish step below.
-
-The workspace root `package.json` is marked `"private": true`, so it is intentionally not an
-NPM package. Do not run `npm publish` from this repository.
+Path-specific extras are listed under each section below.
 
 ---
 
-## Packaging a VSIX
+# Path 1 — VS Code
 
-From the workspace root, run:
+## What ships
 
-```bash
-npm run package
-```
+A single `.vsix` (or Marketplace listing) containing:
 
-This runs three steps in order:
-
-1. **`npm run check`** — TypeScript type-checks both packages (no output emitted)
-2. **`npm run compile:prod`** — esbuild bundles `packages/client/src/extension.ts` and
-   `packages/server/src/server.ts` into minified files at `packages/client/dist/`
-3. **`vsce package`** — creates `td-antlers-vscode-<version>.vsix` in the workspace root
-
-The VSIX contains:
 ```
 extension/
 ├─ package.json
 ├─ dist/
-│  ├─ extension.js   ← bundled client (vscode-languageclient + extension code)
-│  └─ server.js      ← bundled server (language server + linter + parser)
+│  ├─ extension.js   ← bundled VS Code client
+│  └─ server.js      ← bundled language server (linter + parser inlined)
 └─ syntaxes/
    └─ antlers.tmLanguage.json
 ```
 
-### Bumping the version before a release
+Recipients do **not** need Node.js or any build tools.
 
-Edit `"version"` in `packages/client/package.json`. The VSIX filename reflects this version.
+## Publishing — VSIX
 
----
+Use this for private/team distribution.
 
-## Publishing to Marketplace
+1. Bump `"version"` in `packages/client/package.json`.
+2. From the workspace root:
 
-Use this when you want users to install the extension from VS Code's Extensions panel instead
-of handling a `.vsix` file manually.
+   ```bash
+   npm run package
+   ```
 
-Before the first Marketplace release:
+   This runs three steps:
 
-1. Confirm `packages/client/package.json` has the correct Marketplace metadata:
-   - `"publisher"` is the Marketplace publisher ID.
-   - `"name"` is the extension ID.
-   - `"displayName"`, `"description"`, `"categories"`, `"repository"`, and `"license"` are
-     ready for public display.
-2. Create or use the Visual Studio Marketplace publisher account for that publisher ID.
-3. Create a Marketplace publishing token and log in with `vsce`:
+   1. `npm run check` — TypeScript type-checks both packages
+   2. `npm run compile:prod` — esbuild bundles client + server (minified) into `packages/client/dist/`
+   3. `vsce package` — creates `td-antlers-vscode-<version>.vsix` in the workspace root
+3. Install the generated VSIX locally and smoke-test against an `.antlers.html` file.
+4. Share the `.vsix` via Slack / email / shared drive / GitHub release.
+
+## Publishing — Marketplace
+
+Use this for public or organization-wide distribution.
+
+One-time setup:
+
+1. Confirm `packages/client/package.json` Marketplace metadata is correct (`publisher`, `name`, `displayName`, `description`, `categories`, `repository`, `license`).
+2. Create / verify the Visual Studio Marketplace publisher account for that publisher ID.
+3. Generate a Marketplace publishing token and log in:
+
+   ```bash
+   cd packages/client
+   npx vsce login josh-theory
+   ```
+
+Each release:
 
 ```bash
-cd packages/client
-npx vsce login josh-theory
-```
-
-For each Marketplace release:
-
-```bash
+# Bump packages/client/package.json "version" first
 npm run package
+
 cd packages/client
 npx vsce publish --packagePath ../../td-antlers-vscode-<version>.vsix
 ```
 
-Replace `<version>` with the version from `packages/client/package.json`.
+Replace `<version>` with the version you just bumped to.
 
-`vsce publish` is the publish action for this project. `npm publish` would publish JavaScript
-package metadata to the NPM registry, which does not install this as a VS Code extension.
+> `vsce publish` is the publish action for this project. `npm publish` would push JS package metadata to the npm registry, which does **not** install as a VS Code extension.
 
----
+## Installing — Marketplace
 
-## Sharing a VSIX with the team
+VS Code UI:
 
-Send the `.vsix` file directly (Slack, email, shared drive, GitHub release, etc.).
+1. Extensions panel (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+2. Search **Antlers Language Support** (publisher `josh-theory`)
+3. Install, reload if prompted
 
-Recipients do **not** need Node.js or any build tools.
-
----
-
-## Installation
-
-Use the Marketplace path when the extension has been published there. Use the VSIX path for
-private builds, release candidates, or versions that have not been published yet.
-
-### Option A - Marketplace
-
-1. Open VS Code
-2. Open the Extensions panel (`Ctrl+Shift+X` / `Cmd+Shift+X`)
-3. Search for **Antlers Language Support**
-4. Install the extension published by `josh-theory`
-5. Reload VS Code if prompted
-
-Command line:
+CLI:
 
 ```bash
 code --install-extension josh-theory.td-antlers-vscode
 ```
 
-### Option B - VSIX via VS Code UI
+## Installing — VSIX
 
-1. Open VS Code
-2. Open the Extensions panel (`Ctrl+Shift+X` / `Cmd+Shift+X`)
-3. Click the **`...`** menu (top-right of the Extensions panel)
-4. Choose **Install from VSIX...**
-5. Select the `.vsix` file
-6. Reload VS Code when prompted
+VS Code UI:
 
-### Option C - VSIX via command line
+1. Extensions panel → `...` menu → **Install from VSIX...**
+2. Select the `.vsix`, reload when prompted
+
+CLI:
 
 ```bash
-code --install-extension td-antlers-vscode-0.0.1.vsix
+code --install-extension td-antlers-vscode-<version>.vsix
 ```
 
----
-
-## Using the extension
-
-Once installed, the extension activates automatically whenever you open a file with the
-`.antlers.html` extension.
-
-**What you get:**
+## What you get
 
 | Feature | Description |
-|---|---|
-| Syntax highlighting | Grammar-based coloring for Antlers tags, variables, and modifiers |
+| --- | --- |
+| Syntax highlighting | Grammar-based coloring for Antlers tags, variables, modifiers |
 | Semantic tokens | Precise token-level coloring (variables, functions, operators, strings, keywords, comments) |
 | Diagnostics | Linting errors and warnings inline, powered by `td-antlers-linter` |
-| Linter config | Place an `antlerslint.config.{js,mjs,cjs,json}` in your workspace root to customize rules |
+| Linter config | Place an `antlerslint.config.{js,mjs,cjs,json}` in your workspace root |
 
-**Settings** (VS Code settings.json):
+Settings (VS Code `settings.json`):
 
 ```jsonc
 {
@@ -192,62 +140,93 @@ Once installed, the extension activates automatically whenever you open a file w
 
 ---
 
-## Development workflow (for contributors)
+# Path 2 — Neovim
+
+## What ships
+
+Three independent artifacts. End users always need (1); (2) and (3) are optional but recommended for a full experience:
+
+1. **`td-antlers-language-server`** — the LSP binary, installed from npm.
+2. **`tree-sitter-antlers`** grammar — checked into this repo at `tree-sitter-antlers/`, compiled locally by `nvim-treesitter`.
+3. **`antlers.nvim`** plugin — the `nvim/` directory in this repo, loaded by a Lua plugin manager.
+
+## Publishing — npm (language server)
+
+The server in `packages/server/` is published as [`td-antlers-language-server`](https://www.npmjs.com/package/td-antlers-language-server).
+
+One-time setup: log in to npm with a publisher account that owns (or can claim) the package name.
 
 ```bash
-# Install dependencies
+npm login
+```
+
+Each release:
+
+1. Bump `"version"` in `packages/server/package.json`.
+2. Publish:
+
+   ```bash
+   cd packages/server
+   npm publish --access public
+   ```
+
+   `prepublishOnly` re-runs the production bundle, so `dist/server.js` is always rebuilt before publish. The tarball ships `dist/`, `bin/`, and `README.md` (see the `files` field).
+3. Verify with `npx td-antlers-language-server@<version> --stdio` (it should hang waiting for an LSP `initialize`, which is correct).
+
+## Publishing — tree-sitter grammar
+
+The grammar source lives in `tree-sitter-antlers/`. The generated `src/parser.c` is checked in, so consumers don't need `tree-sitter-cli`.
+
+After editing `grammar.js`:
+
+```bash
+cd tree-sitter-antlers
 npm install
-
-# Type-check only (no output)
-npm run check
-
-# Build bundles for development (with source maps, no minification)
-npm run compile
-
-# Build and watch for changes
-npm run compile:watch
-
-# Launch the extension in a VS Code Extension Development Host
-# (use F5 in VS Code with this repo open — runs compile first via preLaunchTask)
+npx tree-sitter generate     # regenerates src/parser.c
+npx tree-sitter test         # runs corpus tests in test/corpus/
+git add src/ grammar.js test/ queries/
+git commit -m "tree-sitter: <description>"
 ```
 
-To debug both the client and the server simultaneously, use the **Client + Server**
-compound launch configuration in `.vscode/launch.json`. The server exposes a debug port
-on `6009` which the "Attach to Server" config connects to.
+Distribution today is **source-only via this Git repo**. `nvim-treesitter` clones the repo and compiles `src/parser.c` on `:TSInstall antlers`. If the grammar matures, options for wider distribution:
 
----
+- Publish to npm as `tree-sitter-antlers` (for consumers using `tree-sitter` from JS).
+- Submit upstream to `nvim-treesitter/nvim-treesitter` so users get it without registering the parser themselves.
 
-## Publishing the language server to npm
+Neither of those is required for this repo's plugin to work.
 
-The language server in `packages/server/` is published as
-[`td-antlers-language-server`](https://www.npmjs.com/package/td-antlers-language-server) so
-non-VS Code editors (Neovim, Helix, Sublime LSP, etc.) can consume it.
+## Publishing — Neovim plugin
 
-```bash
-# From the workspace root: produce the bundled server at packages/server/dist/server.js
-npm run compile:prod
+The plugin is the `nvim/` directory of this repo. There is no separate registry — Neovim plugin managers fetch directly from Git. To "publish" a new version:
 
-# Bump the version in packages/server/package.json, then publish.
-cd packages/server
-npm publish --access public
-```
+1. Make sure `nvim/lua/antlers/init.lua` and `nvim/README.md` reflect the change.
+2. Tag a release (optional but recommended so users can pin):
 
-`prepublishOnly` re-runs the production bundle, so the dist artifact is always fresh. The
-published tarball ships `dist/`, `bin/`, and `README.md` (see the `files` field).
+   ```bash
+   git tag nvim-v<version>
+   git push origin nvim-v<version>
+   ```
+3. Announce the tag / commit. Users update by re-syncing their plugin manager.
 
-After publish, users install with:
+## Installing — end-user setup
+
+Users install in three steps. The first two are prerequisites; the third pulls in this repo.
+
+### 1. Install the language server
 
 ```bash
 npm install -g td-antlers-language-server
-td-antlers-language-server --stdio   # spoken by the editor's LSP client
 ```
 
----
+Verify `td-antlers-language-server` is on `$PATH`.
 
-## Distributing the Neovim plugin
+### 2. (Optional) Install nvim-treesitter
 
-Neovim users install `antlers.nvim` (the `nvim/` directory) by pointing a plugin manager at
-this repository. Example with lazy.nvim:
+[`nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter) is required for tree-sitter highlighting. Skip if you don't want syntax highlighting beyond what the LSP provides via semantic tokens.
+
+### 3. Install antlers.nvim
+
+**lazy.nvim:**
 
 ```lua
 {
@@ -260,28 +239,86 @@ this repository. Example with lazy.nvim:
 }
 ```
 
-The plugin requires `td-antlers-language-server` to be installed via npm (see above) and,
-optionally, [`nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter) for
-highlighting via the bundled grammar.
+**packer / vim-plug / manual:** clone the repo, then add `nvim/` to `runtimepath` and call `require('antlers').setup()`.
 
-See [`nvim/README.md`](nvim/README.md) for full usage, configuration, and a manual
-(plugin-free) setup recipe.
+`setup()` accepts:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `cmd` | `{ 'td-antlers-language-server', '--stdio' }` | LSP launch command |
+| `root_markers` | `antlerslint.config.*`, `composer.json`, `.git` | Workspace anchors |
+| `settings` | `{ antlers = { maxNumberOfProblems = 100 } }` | LSP `workspace/configuration` payload |
+| `auto_install_treesitter` | `true` | Run `:TSInstall antlers` if the parser is missing |
+| `on_attach` | `nil` | Standard LSP `on_attach` callback |
+
+## Installing — without the plugin
+
+If you'd rather wire it up by hand:
+
+```lua
+-- Filetype detection
+vim.filetype.add({ pattern = { ['.*%.antlers%.html'] = 'antlers' } })
+
+-- LSP (Neovim 0.11+)
+vim.lsp.config('antlers', {
+  cmd = { 'td-antlers-language-server', '--stdio' },
+  filetypes = { 'antlers' },
+  root_markers = { 'antlerslint.config.json', '.git' },
+  settings = { antlers = { maxNumberOfProblems = 100 } },
+})
+vim.lsp.enable('antlers')
+
+-- Tree-sitter (with nvim-treesitter)
+require('nvim-treesitter.parsers').get_parser_configs().antlers = {
+  install_info = {
+    url = 'https://github.com/josh-theory/antlers-vscode',
+    location = 'tree-sitter-antlers',
+    files = { 'src/parser.c' },
+    branch = 'main',
+  },
+  filetype = 'antlers',
+}
+-- :TSInstall antlers
+```
+
+## What you get
+
+Same diagnostics and semantic-token coverage as VS Code (it's the same server). Tree-sitter additionally provides static highlighting and HTML injection (HTML inside `.antlers.html` files is parsed by tree-sitter-html and inherits its highlight set).
 
 ---
 
-## Tree-sitter grammar
-
-The grammar lives in `tree-sitter-antlers/`. Source is checked in (including the generated
-`src/parser.c`) so consumers don't need `tree-sitter-cli`. To regenerate after editing
-`grammar.js`:
+# Development workflow (contributors, both paths)
 
 ```bash
-cd tree-sitter-antlers
+# Install workspace dependencies
 npm install
-npx tree-sitter generate
-npx tree-sitter test
+
+# Type-check both packages (no output emitted)
+npm run check
+
+# Build dev bundles (sourcemaps, no minification) — emits to
+#   packages/client/dist/extension.js
+#   packages/client/dist/server.js
+#   packages/server/dist/server.js
+npm run compile
+
+# Build and watch
+npm run compile:watch
+
+# Server unit tests
+cd packages/server && npm test
+
+# Tree-sitter grammar tests
+cd tree-sitter-antlers && npx tree-sitter test
 ```
 
-The grammar is currently distributed as source — `nvim-treesitter` (and other editors)
-clones the repo and compiles `src/parser.c` locally. If/when the grammar matures, it can be
-published to npm as `tree-sitter-antlers` and submitted upstream to `nvim-treesitter`.
+To debug both the VS Code client and server simultaneously, use the **Client + Server** compound launch configuration in `.vscode/launch.json`. The server exposes a debug port on `6009` which the "Attach to Server" config connects to.
+
+To debug the Neovim path, run the published binary against a test document:
+
+```bash
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"capabilities":{}}}' \
+  | td-antlers-language-server --stdio
+```
+
+(Wrap in proper LSP `Content-Length` framing for a real round-trip.)
