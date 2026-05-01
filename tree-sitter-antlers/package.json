@@ -1,0 +1,32 @@
+{
+  "name": "tree-sitter-antlers",
+  "version": "0.0.1",
+  "description": "Tree-sitter grammar for the Antlers templating language",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/josh-theory/antlers-vscode",
+    "directory": "tree-sitter-antlers"
+  },
+  "keywords": [
+    "antlers",
+    "statamic",
+    "tree-sitter",
+    "parser"
+  ],
+  "main": "bindings/node",
+  "types": "bindings/node",
+  "files": [
+    "grammar.js",
+    "queries/**/*.scm",
+    "src/**",
+    "bindings/**"
+  ],
+  "scripts": {
+    "generate": "tree-sitter generate",
+    "test": "tree-sitter test"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.24.0"
+  }
+}

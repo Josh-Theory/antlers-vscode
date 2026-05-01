@@ -1,13 +1,36 @@
 {
-	"name": "td-antlers-server",
-	"description": "Antlers language server",
+	"name": "td-antlers-language-server",
+	"description": "Language Server Protocol implementation for the Antlers templating language",
 	"version": "0.0.1",
 	"license": "MIT",
-	"main": "./out/server.js",
+	"main": "./dist/server.js",
+	"bin": {
+		"td-antlers-language-server": "./bin/td-antlers-language-server.js"
+	},
+	"files": [
+		"dist",
+		"bin",
+		"README.md",
+		"LICENSE"
+	],
+	"keywords": [
+		"antlers",
+		"statamic",
+		"language-server",
+		"lsp",
+		"neovim"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/josh-theory/antlers-vscode",
+		"directory": "packages/server"
+	},
 	"engines": {
 		"node": ">=18"
 	},
 	"scripts": {
+		"build": "node ../../build.mjs --production",
+		"prepublishOnly": "npm run build",
 		"test": "node --import tsx --test test/*.test.ts"
 	},
 	"dependencies": {
