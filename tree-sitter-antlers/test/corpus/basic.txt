@@ -1,0 +1,67 @@
+==================
+Plain text
+==================
+<p>Hello world</p>
+---
+
+(template
+  (text))
+
+==================
+Simple interpolation
+==================
+<p>Hello, {{ name }}</p>
+---
+
+(template
+  (text)
+  (tag (variable))
+  (text))
+
+==================
+Block tags
+==================
+{{ if user }}hi{{ /if }}
+---
+
+(template
+  (tag (variable) (variable))
+  (text)
+  (tag (closing_tag name: (variable))))
+
+==================
+Comment
+==================
+{{# this is a comment #}}
+---
+
+(template
+  (comment))
+
+==================
+Modifier with argument
+==================
+{{ published_at | format "Y-m-d" }}
+---
+
+(template
+  (tag
+    (variable)
+    (modifier
+      name: (identifier)
+      argument: (string))))
+
+==================
+Sample template
+==================
+{{ if user }}
+  <p>Hello, {{ user | upper }}!</p>
+{{ /if }}
+---
+
+(template
+  (tag (variable) (variable))
+  (text)
+  (tag (variable) (modifier name: (identifier)))
+  (text)
+  (tag (closing_tag name: (variable))))

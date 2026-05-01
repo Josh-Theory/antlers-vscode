@@ -4,6 +4,7 @@ import { dirname, resolve } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const clientDir = resolve(__dirname, 'packages/client');
+const serverDir = resolve(__dirname, 'packages/server');
 
 const isWatch = process.argv.includes('--watch');
 const isProduction = process.argv.includes('--production');
@@ -29,6 +30,12 @@ const configs = [
 		...common,
 		entryPoints: [resolve(__dirname, 'packages/server/src/server.ts')],
 		outfile: resolve(clientDir, 'dist/server.js'),
+		external: []
+	},
+	{
+		...common,
+		entryPoints: [resolve(__dirname, 'packages/server/src/server.ts')],
+		outfile: resolve(serverDir, 'dist/server.js'),
 		external: []
 	}
 ];
