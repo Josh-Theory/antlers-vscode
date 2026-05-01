@@ -6,3 +6,4 @@ packages/*/.vscode-test/
 *.tsbuildinfo
 *.vsix
 .DS_Store
+.codex

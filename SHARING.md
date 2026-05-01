@@ -1,12 +1,15 @@
-# Antlers Language Support — Packaging & Distribution Guide
+# Antlers Language Support - Packaging & Distribution Guide
 
 ## Overview
 
 This extension provides Antlers template language support in VS Code (syntax highlighting,
 semantic tokens, and diagnostics via the Antlers linter). The build system uses esbuild to
-bundle the VS Code client extension and the language server — plus all their dependencies —
-into two self-contained JS files inside `packages/client/dist/`. The resulting `.vsix` file
-is fully plug-and-play: no `npm install` or compile step needed by the recipient.
+bundle the VS Code client extension and the language server, plus all their dependencies,
+into two self-contained JS files inside `packages/client/dist/`.
+
+This is a VS Code extension, so do **not** distribute it with `npm publish`. NPM is only used
+for local dependencies and build scripts in this repository. Distribution happens through a
+VSIX file, the Visual Studio Marketplace, or both.
 
 ---
 
@@ -18,7 +21,32 @@ is fully plug-and-play: no `npm install` or compile step needed by the recipient
 
 ---
 
-## Packaging
+## Release workflow
+
+Use this checklist for every version you plan to share.
+
+1. Decide the release channel:
+   - **Private/team distribution:** create a `.vsix` and share it directly.
+   - **Public or organization-wide distribution:** publish the extension package with `vsce`
+     to the Visual Studio Marketplace.
+2. Update `"version"` in `packages/client/package.json`. This is the extension version used
+   by VS Code, Marketplace, and the generated VSIX filename.
+3. Run the release package command from the workspace root:
+
+```bash
+npm run package
+```
+
+4. Install the generated VSIX locally and smoke-test it with an `.antlers.html` file before
+   sharing or publishing.
+5. If publishing to Marketplace, run the Marketplace publish step below.
+
+The workspace root `package.json` is marked `"private": true`, so it is intentionally not an
+NPM package. Do not run `npm publish` from this repository.
+
+---
+
+## Packaging a VSIX
 
 From the workspace root, run:
 
@@ -50,7 +78,42 @@ Edit `"version"` in `packages/client/package.json`. The VSIX filename reflects t
 
 ---
 
-## Sharing with the team
+## Publishing to Marketplace
+
+Use this when you want users to install the extension from VS Code's Extensions panel instead
+of handling a `.vsix` file manually.
+
+Before the first Marketplace release:
+
+1. Confirm `packages/client/package.json` has the correct Marketplace metadata:
+   - `"publisher"` is the Marketplace publisher ID.
+   - `"name"` is the extension ID.
+   - `"displayName"`, `"description"`, `"categories"`, `"repository"`, and `"license"` are
+     ready for public display.
+2. Create or use the Visual Studio Marketplace publisher account for that publisher ID.
+3. Create a Marketplace publishing token and log in with `vsce`:
+
+```bash
+cd packages/client
+npx vsce login josh-theory
+```
+
+For each Marketplace release:
+
+```bash
+npm run package
+cd packages/client
+npx vsce publish --packagePath ../../td-antlers-vscode-<version>.vsix
+```
+
+Replace `<version>` with the version from `packages/client/package.json`.
+
+`vsce publish` is the publish action for this project. `npm publish` would publish JavaScript
+package metadata to the NPM registry, which does not install this as a VS Code extension.
+
+---
+
+## Sharing a VSIX with the team
 
 Send the `.vsix` file directly (Slack, email, shared drive, GitHub release, etc.).
 
@@ -58,18 +121,35 @@ Recipients do **not** need Node.js or any build tools.
 
 ---
 
-## Installation (recipient steps)
+## Installation
 
-### Option A — VS Code UI
+Use the Marketplace path when the extension has been published there. Use the VSIX path for
+private builds, release candidates, or versions that have not been published yet.
+
+### Option A - Marketplace
 
 1. Open VS Code
 2. Open the Extensions panel (`Ctrl+Shift+X` / `Cmd+Shift+X`)
-3. Click the **`···`** menu (top-right of the Extensions panel)
+3. Search for **Antlers Language Support**
+4. Install the extension published by `josh-theory`
+5. Reload VS Code if prompted
+
+Command line:
+
+```bash
+code --install-extension josh-theory.td-antlers-vscode
+```
+
+### Option B - VSIX via VS Code UI
+
+1. Open VS Code
+2. Open the Extensions panel (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+3. Click the **`...`** menu (top-right of the Extensions panel)
 4. Choose **Install from VSIX...**
 5. Select the `.vsix` file
 6. Reload VS Code when prompted
 
-### Option B — Command line
+### Option C - VSIX via command line
 
 ```bash
 code --install-extension td-antlers-vscode-0.0.1.vsix
