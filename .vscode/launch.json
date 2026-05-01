@@ -10,7 +10,7 @@
 				"--extensionDevelopmentPath=${workspaceRoot}/packages/client"
 			],
 			"outFiles": [
-				"${workspaceRoot}/packages/client/out/**/*.js"
+				"${workspaceRoot}/packages/client/dist/**/*.js"
 			],
 			"preLaunchTask": "compile"
 		},
@@ -21,7 +21,7 @@
 			"port": 6009,
 			"restart": true,
 			"outFiles": [
-				"${workspaceRoot}/packages/server/out/**/*.js"
+				"${workspaceRoot}/packages/client/dist/**/*.js"
 			]
 		}
 	],

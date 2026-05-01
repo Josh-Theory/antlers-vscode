@@ -6,12 +6,17 @@
 		"packages/*"
 	],
 	"scripts": {
-		"compile": "tsc -b",
-		"watch": "tsc -b -w",
-		"clean": "tsc -b --clean"
+		"check": "tsc -b",
+		"compile": "node build.mjs",
+		"compile:watch": "node build.mjs --watch",
+		"compile:prod": "node build.mjs --production",
+		"clean": "tsc -b --clean && rm -rf packages/client/dist",
+		"package": "npm run check && npm run compile:prod && cd packages/client && vsce package --no-dependencies --out ../../"
 	},
 	"devDependencies": {
 		"@types/node": "^22",
+		"@vscode/vsce": "^3.2.1",
+		"esbuild": "^0.24.0",
 		"typescript": "^5.9.2"
 	}
 }
