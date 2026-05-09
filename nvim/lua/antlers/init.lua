@@ -32,23 +32,37 @@ local defaults = {
 }
 
 local function register_treesitter(opts)
-	local ok, parsers = pcall(require, 'nvim-treesitter.parsers')
-	if not ok then
+	if not pcall(require, 'nvim-treesitter.parsers') then
 		return
 	end
 
-	local configs = parsers.get_parser_configs()
-	if configs.antlers == nil then
-		configs.antlers = {
-			install_info = {
-				url = 'https://github.com/josh-theory/antlers-vscode',
-				location = 'tree-sitter-antlers',
-				files = { 'src/parser.c' },
-				branch = 'main',
-			},
-			filetype = 'antlers',
-		}
+	local function add_parser()
+		-- Always require fresh — install.lua clears package.loaded before firing TSUpdate,
+		-- so a closed-over reference would point to the old (discarded) table.
+		-- nvim-treesitter v1+ exposes parsers as a plain table; older versions used get_parser_configs().
+		local p = require('nvim-treesitter.parsers')
+		local configs = type(p.get_parser_configs) == 'function' and p.get_parser_configs() or p
+		if configs.antlers == nil then
+			configs.antlers = {
+				install_info = {
+					url = 'https://github.com/josh-theory/antlers-vscode',
+					location = 'tree-sitter-antlers',
+					files = { 'src/parser.c' },
+					branch = 'main',
+				},
+				filetype = 'antlers',
+			}
+		end
 	end
+
+	-- Register immediately and re-register whenever nvim-treesitter rebuilds its parser list.
+	-- install.lua clears the module cache and fires "User TSUpdate" before calling norm_languages,
+	-- so this autocmd ensures the antlers entry survives cache invalidation.
+	add_parser()
+	vim.api.nvim_create_autocmd('User', {
+		pattern = 'TSUpdate',
+		callback = add_parser,
+	})
 
 	if opts.auto_install_treesitter then
 		local has_parser = pcall(vim.treesitter.language.inspect, 'antlers')
