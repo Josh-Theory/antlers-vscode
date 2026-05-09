@@ -140,7 +140,19 @@
     "named": false
   },
   {
+    "type": "!==",
+    "named": false
+  },
+  {
     "type": "\"",
+    "named": false
+  },
+  {
+    "type": "%",
+    "named": false
+  },
+  {
+    "type": "%=",
     "named": false
   },
   {
@@ -156,7 +168,19 @@
     "named": false
   },
   {
+    "type": "**",
+    "named": false
+  },
+  {
+    "type": "*=",
+    "named": false
+  },
+  {
     "type": "+",
+    "named": false
+  },
+  {
+    "type": "+=",
     "named": false
   },
   {
@@ -164,7 +188,15 @@
     "named": false
   },
   {
+    "type": "-=",
+    "named": false
+  },
+  {
     "type": "/",
+    "named": false
+  },
+  {
+    "type": "/=",
     "named": false
   },
   {
@@ -176,11 +208,19 @@
     "named": false
   },
   {
+    "type": "<=>",
+    "named": false
+  },
+  {
     "type": "=",
     "named": false
   },
   {
     "type": "==",
+    "named": false
+  },
+  {
+    "type": "===",
     "named": false
   },
   {
@@ -192,7 +232,19 @@
     "named": false
   },
   {
+    "type": "?:",
+    "named": false
+  },
+  {
+    "type": "?=",
+    "named": false
+  },
+  {
     "type": "??",
+    "named": false
+  },
+  {
+    "type": "and",
     "named": false
   },
   {
@@ -216,6 +268,10 @@
     "named": true
   },
   {
+    "type": "or",
+    "named": false
+  },
+  {
     "type": "text",
     "named": true
   },
@@ -226,6 +282,10 @@
   {
     "type": "variable",
     "named": true
+  },
+  {
+    "type": "xor",
+    "named": false
   },
   {
     "type": "{{",

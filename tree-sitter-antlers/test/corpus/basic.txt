@@ -52,6 +52,24 @@ Modifier with argument
       argument: (string))))
 
 ==================
+Operators and constants
+==================
+{{ foo >= 10 && bar != true ?= false }}
+---
+
+(template
+  (tag
+    (variable)
+    (operator)
+    (number)
+    (operator)
+    (variable)
+    (operator)
+    (boolean)
+    (operator)
+    (boolean)))
+
+==================
 Sample template
 ==================
 {{ if user }}

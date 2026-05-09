@@ -24,10 +24,10 @@
 			"begin": "\\{\\{",
 			"end": "\\}\\}",
 			"beginCaptures": {
-				"0": { "name": "punctuation.section.embedded.begin.antlers" }
+				"0": { "name": "punctuation.definition.tag.begin.html.antlers" }
 			},
 			"endCaptures": {
-				"0": { "name": "punctuation.section.embedded.end.antlers" }
+				"0": { "name": "punctuation.definition.tag.end.html.antlers" }
 			},
 			"patterns": [
 				{ "include": "#antlers-keyword" },
@@ -38,8 +38,8 @@
 			]
 		},
 		"antlers-keyword": {
-			"name": "keyword.control.antlers",
-			"match": "\\/?(?:if|elseif|else|unless|foreach|for|each|endif|endunless|endforeach|endfor|endeach)\\b"
+			"name": "keyword.control.conditional.antlers",
+			"match": "\\/?(?:if|elseif|else|unless|elseunless|foreach|for|each|endif|endunless|endforeach|endfor|endeach)\\b"
 		},
 		"antlers-string": {
 			"patterns": [
@@ -66,11 +66,35 @@
 			"match": "\\b\\d+(\\.\\d+)?\\b"
 		},
 		"antlers-operator": {
-			"name": "keyword.operator.antlers",
-			"match": "==|!=|>=|<=|&&|\\|\\||\\?\\?|[+\\-*/<>=!|]"
+			"patterns": [
+				{
+					"name": "keyword.operator.comparison.antlers",
+					"match": "===|!==|==|!=|>=|<=|<=>|[<>=]"
+				},
+				{
+					"name": "keyword.operator.logical.antlers",
+					"match": "&&|\\|\\||\\b(?:and|or|xor)\\b|!"
+				},
+				{
+					"name": "keyword.operator.assignment.antlers",
+					"match": "\\+=|-=|\\*=|/=|%=|="
+				},
+				{
+					"name": "keyword.operator.arithmetic.antlers",
+					"match": "\\*\\*|[+\\-*/%]"
+				},
+				{
+					"name": "keyword.operator.pipe.antlers",
+					"match": "\\|"
+				},
+				{
+					"name": "keyword.operator.null-coalescing.antlers",
+					"match": "\\?\\?|\\?:|\\?="
+				}
+			]
 		},
 		"antlers-variable": {
-			"name": "variable.other.antlers",
+			"name": "variable.other.readwrite.antlers",
 			"match": "\\b[a-zA-Z_][\\w]*(?::[a-zA-Z_][\\w]*)*\\b"
 		}
 	}

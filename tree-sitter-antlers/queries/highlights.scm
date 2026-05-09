@@ -6,7 +6,7 @@
 ["{{" "}}"] @tag.delimiter
 
 (closing_tag "/" @tag.delimiter)
-(closing_tag name: (variable) @keyword.control)
+(closing_tag name: (variable) @tag)
 
 (boolean) @constant.builtin
 
@@ -23,6 +23,9 @@
 ; Antlers control-flow words at the head of a tag are emitted as variables;
 ; tag them by name.
 ((variable) @keyword.control
-  (#match? @keyword.control "^(if|elseif|else|unless|foreach|for|each|endif|endunless|endforeach|endfor|endeach)$"))
+  (#match? @keyword.control "^(if|elseif|else|unless|elseunless|foreach|for|each|endif|endunless|endforeach|endfor|endeach)$"))
+
+((tag (variable) @tag)
+  (#match? @tag "^[A-Za-z_][A-Za-z0-9_]*:[A-Za-z_]"))
 
 (variable) @variable

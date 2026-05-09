@@ -20,6 +20,7 @@ interface NodeLike {
 	runtimeNodes?: NodeLike[];
 	isComment?: boolean;
 	isTagNode?: boolean;
+	isVirtual?: boolean;
 }
 
 interface RuntimeRule {
@@ -30,10 +31,12 @@ interface RuntimeRule {
 
 const RUNTIME_RULES: Record<string, RuntimeRule> = {
 	VariableNode: { type: 'variable', startShift: 1 },
-	ModifierSeparator: { type: 'operator', startShift: 0 },
 	ModifierNameNode: { type: 'function', startShift: 1 },
-	EqualCompOperator: { type: 'operator', startShift: 0 },
-	StringValueNode: { type: 'string', startShift: 0, lengthAdjust: 1 }
+	StringValueNode: { type: 'string', startShift: 0, lengthAdjust: 1 },
+	NumberNode: { type: 'number', startShift: 1 },
+	FalseConstant: { type: 'keyword', startShift: 1 },
+	NullConstant: { type: 'keyword', startShift: 1 },
+	TrueConstant: { type: 'keyword', startShift: 1 }
 };
 
 export async function tokenize(text: string): Promise<Token[]> {
@@ -72,7 +75,7 @@ function collectFromNode(text: string, node: NodeLike, tokens: Token[]): void {
 	const head = node.isTagNode ? findHeadName(text, node) : null;
 	if (head) tokens.push(head.token);
 	for (const inner of node.runtimeNodes ?? []) {
-		const rule = RUNTIME_RULES[inner.constructor.name];
+		const rule = ruleForRuntimeNode(inner);
 		if (!rule) continue;
 		if (head && overlapsHeadName(inner, head)) continue;
 		const tok = makeToken(inner, rule);
@@ -92,7 +95,9 @@ function findHeadName(text: string, node: NodeLike): HeadNameHit | null {
 	const nameEnd = i;
 	if (nameEnd === nameStart) return null;
 	const bareName = text.slice(nameStart, nameEnd);
-	const type: TokenType = CONTROL_KEYWORDS.has(bareName) ? 'keyword' : 'variable';
+	const type: TokenType = CONTROL_KEYWORDS.has(bareName)
+		? 'keyword'
+		: (text[slashStart] === '/' || bareName.includes(':') ? 'tag' : 'variable');
 	return {
 		token: {
 			line: start.line - 1,
@@ -116,10 +121,20 @@ function makeToken(node: NodeLike, rule: RuntimeRule): Token | null {
 	const start = node.startPosition;
 	const end = node.endPosition;
 	if (!start || !end) return null;
+	if (end.offset <= start.offset) return null;
 	return {
 		line: start.line - 1,
 		char: start.char - 1 + rule.startShift,
 		length: end.offset - start.offset + (rule.lengthAdjust ?? 0),
 		type: rule.type
 	};
+}
+
+function ruleForRuntimeNode(node: NodeLike): RuntimeRule | undefined {
+	const name = node.constructor.name;
+	return RUNTIME_RULES[name] ?? (isOperatorNodeName(name) ? { type: 'operator', startShift: 0 } : undefined);
+}
+
+function isOperatorNodeName(name: string): boolean {
+	return name.endsWith('Operator') || name.endsWith('Separator') || name === 'StatementSeparatorNode';
 }

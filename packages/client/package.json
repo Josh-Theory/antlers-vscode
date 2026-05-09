@@ -30,6 +30,9 @@
 				],
 				"extensions": [
 					".antlers.html"
+				],
+				"filenamePatterns": [
+					"*.antlers.html"
 				]
 			}
 		],
@@ -43,6 +46,53 @@
 				}
 			}
 		],
+		"semanticTokenTypes": [
+			{
+				"id": "tag",
+				"superType": "type",
+				"description": "Antlers tag name."
+			}
+		],
+		"semanticTokenScopes": [
+			{
+				"language": "antlers",
+				"scopes": {
+					"comment": [
+						"comment.block.antlers"
+					],
+					"function": [
+						"entity.name.function.antlers",
+						"support.function.antlers"
+					],
+					"keyword": [
+						"keyword.control.conditional.antlers",
+						"keyword.control.antlers"
+					],
+					"number": [
+						"constant.numeric.antlers"
+					],
+					"operator": [
+						"keyword.operator.antlers"
+					],
+					"string": [
+						"string.quoted.double.antlers",
+						"string.quoted.single.antlers"
+					],
+					"tag": [
+						"entity.name.tag.html.antlers"
+					],
+					"variable": [
+						"variable.other.readwrite.antlers",
+						"entity.name.variable.antlers"
+					]
+				}
+			}
+		],
+		"configurationDefaults": {
+			"[antlers]": {
+				"editor.semanticHighlighting.enabled": true
+			}
+		},
 		"configuration": {
 			"type": "object",
 			"title": "Antlers",

@@ -211,6 +211,14 @@
       "members": [
         {
           "type": "STRING",
+          "value": "==="
+        },
+        {
+          "type": "STRING",
+          "value": "!=="
+        },
+        {
+          "type": "STRING",
           "value": "=="
         },
         {
@@ -227,6 +235,10 @@
         },
         {
           "type": "STRING",
+          "value": "<=>"
+        },
+        {
+          "type": "STRING",
           "value": "&&"
         },
         {
@@ -235,7 +247,43 @@
         },
         {
           "type": "STRING",
-          "value": "??"
+          "value": "and"
+        },
+        {
+          "type": "STRING",
+          "value": "or"
+        },
+        {
+          "type": "STRING",
+          "value": "xor"
+        },
+        {
+          "type": "STRING",
+          "value": "+="
+        },
+        {
+          "type": "STRING",
+          "value": "-="
+        },
+        {
+          "type": "STRING",
+          "value": "*="
+        },
+        {
+          "type": "STRING",
+          "value": "/="
+        },
+        {
+          "type": "STRING",
+          "value": "%="
+        },
+        {
+          "type": "STRING",
+          "value": "="
+        },
+        {
+          "type": "STRING",
+          "value": "**"
         },
         {
           "type": "STRING",
@@ -255,15 +303,27 @@
         },
         {
           "type": "STRING",
+          "value": "%"
+        },
+        {
+          "type": "STRING",
+          "value": "??"
+        },
+        {
+          "type": "STRING",
+          "value": "?:"
+        },
+        {
+          "type": "STRING",
+          "value": "?="
+        },
+        {
+          "type": "STRING",
           "value": "<"
         },
         {
           "type": "STRING",
           "value": ">"
-        },
-        {
-          "type": "STRING",
-          "value": "="
         },
         {
           "type": "STRING",

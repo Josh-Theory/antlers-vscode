@@ -5,7 +5,8 @@ export const tokenTypes = [
 	'string',
 	'number',
 	'comment',
-	'keyword'
+	'keyword',
+	'tag'
 ] as const;
 
 export type TokenType = (typeof tokenTypes)[number];

@@ -114,20 +114,34 @@ test('{{ foo | upper }} → variable, pipe operator, modifier function', async (
 	]);
 });
 
-test('{{ collection:articles }} → single variable token spanning full namespaced name', async () => {
+test('{{ collection:articles }} → single tag token spanning full namespaced name', async () => {
 	assert.deepEqual(await tokenize('{{ collection:articles }}'), [
-		{ line: 0, char: 3, length: 19, type: 'variable' }
+		{ line: 0, char: 3, length: 19, type: 'tag' }
 	]);
 });
 
-test('{{ partial:foo }} → single variable token spanning full namespaced name', async () => {
+test('{{ partial:foo }} → single tag token spanning full namespaced name', async () => {
 	assert.deepEqual(await tokenize('{{ partial:foo }}'), [
-		{ line: 0, char: 3, length: 11, type: 'variable' }
+		{ line: 0, char: 3, length: 11, type: 'tag' }
 	]);
 });
 
-test('{{ /collection }} → variable token covering /name (closing non-keyword tag)', async () => {
+test('{{ /collection }} → tag token covering /name (closing non-keyword tag)', async () => {
 	assert.deepEqual(await tokenize('{{ /collection }}'), [
-		{ line: 0, char: 3, length: 11, type: 'variable' }
+		{ line: 0, char: 3, length: 11, type: 'tag' }
+	]);
+});
+
+test('operators beyond equality and literals receive semantic tokens', async () => {
+	assert.deepEqual(await tokenize('{{ foo >= 10 && bar != true ?= false }}'), [
+		{ line: 0, char: 3, length: 3, type: 'variable' },
+		{ line: 0, char: 7, length: 2, type: 'operator' },
+		{ line: 0, char: 10, length: 2, type: 'number' },
+		{ line: 0, char: 13, length: 2, type: 'operator' },
+		{ line: 0, char: 16, length: 3, type: 'variable' },
+		{ line: 0, char: 20, length: 2, type: 'operator' },
+		{ line: 0, char: 23, length: 4, type: 'keyword' },
+		{ line: 0, char: 28, length: 2, type: 'operator' },
+		{ line: 0, char: 31, length: 5, type: 'keyword' }
 	]);
 });
