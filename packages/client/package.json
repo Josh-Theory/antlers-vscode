@@ -2,7 +2,7 @@
 	"name": "td-antlers-vscode",
 	"displayName": "Antlers Language Support",
 	"description": "Language server support for the Antlers templating language.",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "josh-theory",
 	"license": "MIT",
 	"repository": {

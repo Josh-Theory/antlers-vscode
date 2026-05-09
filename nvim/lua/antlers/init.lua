@@ -11,6 +11,7 @@ local M = {}
 ---@field root_markers? string[]           Files / dirs that anchor the workspace.
 ---@field settings? table                  LSP `workspace/configuration` payload.
 ---@field auto_install_treesitter? boolean Try `:TSInstall antlers` if missing (default: true).
+---@field highlight_defaults? boolean      Apply Antlers-specific fallback highlight colors (default: true).
 ---@field on_attach? fun(client: vim.lsp.Client, bufnr: integer)
 
 local defaults = {
@@ -29,7 +30,39 @@ local defaults = {
 		},
 	},
 	auto_install_treesitter = true,
+	highlight_defaults = true,
 }
+
+local antlers_highlights = {
+	['@tag.antlers'] = { fg = '#4EC9B0' },
+	['@tag.delimiter.antlers'] = { fg = '#FFB86C' },
+	['@keyword.antlers'] = { fg = '#C586C0' },
+	['@keyword.control.antlers'] = { fg = '#C586C0' },
+	['@keyword.conditional.antlers'] = { fg = '#C586C0' },
+	['@keyword.repeat.antlers'] = { fg = '#C586C0' },
+	['@variable.antlers'] = { fg = '#9CDCFE' },
+	['@function.method.antlers'] = { fg = '#DCDCAA' },
+	['@operator.antlers'] = { fg = '#4EC9B0' },
+	['@string.antlers'] = { fg = '#CE9178' },
+	['@number.antlers'] = { fg = '#B5CEA8' },
+	['@constant.builtin.antlers'] = { fg = '#569CD6' },
+
+	['@lsp.type.tag.antlers'] = { fg = '#4EC9B0' },
+	['@lsp.type.keyword.antlers'] = { fg = '#C586C0' },
+	['@lsp.type.variable.antlers'] = { fg = '#9CDCFE' },
+	['@lsp.type.function.antlers'] = { fg = '#DCDCAA' },
+	['@lsp.type.operator.antlers'] = { fg = '#4EC9B0' },
+	['@lsp.type.string.antlers'] = { fg = '#CE9178' },
+	['@lsp.type.number.antlers'] = { fg = '#B5CEA8' },
+	['@lsp.type.comment.antlers'] = { link = 'Comment' },
+}
+
+local function apply_highlight_defaults()
+	for group, spec in pairs(antlers_highlights) do
+		local hl = vim.tbl_extend('force', { default = true }, spec)
+		vim.api.nvim_set_hl(0, group, hl)
+	end
+end
 
 local function register_treesitter(opts)
 	if not pcall(require, 'nvim-treesitter.parsers') then
@@ -103,6 +136,14 @@ end
 
 function M.setup(user_opts)
 	local opts = vim.tbl_deep_extend('force', defaults, user_opts or {})
+	if opts.highlight_defaults then
+		apply_highlight_defaults()
+		local group = vim.api.nvim_create_augroup('antlers_highlight_defaults', { clear = true })
+		vim.api.nvim_create_autocmd('ColorScheme', {
+			group = group,
+			callback = apply_highlight_defaults,
+		})
+	end
 	register_treesitter(opts)
 	register_lsp(opts)
 end

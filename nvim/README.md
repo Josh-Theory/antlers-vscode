@@ -45,12 +45,14 @@ Add the `nvim/` directory to your `runtimepath`, then call `require('antlers').s
 | `root_markers` | `antlerslint.config.*`, `composer.json`, `.git` | Files/dirs that anchor the workspace root. |
 | `settings` | `{ antlers = { maxNumberOfProblems = 100 } }` | Sent as LSP `workspace/configuration`. |
 | `auto_install_treesitter` | `true` | Attempt `:TSInstall antlers` if the parser is missing. |
+| `highlight_defaults` | `true` | Apply Antlers-specific fallback colors for Tree-sitter and LSP semantic tokens. |
 | `on_attach` | `nil` | Standard LSP `on_attach` callback. |
 
 Example with custom keymaps:
 
 ```lua
 require('antlers').setup({
+  highlight_defaults = false,
   on_attach = function(_, bufnr)
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = bufnr })
   end,

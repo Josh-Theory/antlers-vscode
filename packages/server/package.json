@@ -1,7 +1,7 @@
 {
 	"name": "td-antlers-language-server",
 	"description": "Language Server Protocol implementation for the Antlers templating language",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"license": "MIT",
 	"main": "./dist/server.js",
 	"bin": {
